@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet.dart';
-import 'login_screen.dart';
+import 'login_view.dart';
 
-class MyRecordsScreen extends StatelessWidget {
-  const MyRecordsScreen({super.key});
+class MyRecordsView extends StatelessWidget {
+  const MyRecordsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class MyRecordsScreen extends StatelessWidget {
               if (context.mounted) {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  MaterialPageRoute(builder: (context) => const LoginView()),
                   (route) => false,
                 );
               }

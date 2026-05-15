@@ -3,10 +3,10 @@ import 'package:intl/intl.dart'; // formatar datas
 import 'package:petfinder/controllers/auth_controller.dart';
 import '../models/pet.dart';
 
-class PetDetailsScreen extends StatelessWidget {
+class PetDetailsView extends StatelessWidget {
   final Pet pet;
 
-  const PetDetailsScreen({super.key, required this.pet});
+  const PetDetailsView({super.key, required this.pet});
 
   @override
   Widget build(BuildContext context) {

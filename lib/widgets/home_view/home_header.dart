@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:petfinder/controllers/pet_controller.dart';
-import 'package:petfinder/screens/my_records_screen.dart';
+import 'package:petfinder/views/my_records_view.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -29,7 +29,7 @@ class HomeHeader extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const MyRecordsScreen(),
+                      builder: (context) => const MyRecordsView(),
                     ),
                   );
                 },

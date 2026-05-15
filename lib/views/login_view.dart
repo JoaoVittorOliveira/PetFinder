@@ -1,10 +1,10 @@
-// lib/screens/login_screen.dart
+// lib/views/login_view.dart
 import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
-import 'home_screen.dart';
+import 'home_view.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class LoginView extends StatelessWidget {
+  const LoginView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class LoginScreen extends StatelessWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const HomeScreen(),
+                            builder: (context) => const HomeView(),
                           ),
                         );
                       }

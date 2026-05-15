@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:petfinder/models/pet.dart';
-import 'package:petfinder/screens/pet_details_screen.dart';
+import 'package:petfinder/views/pet_details_view.dart';
 
 class HighlightCard extends StatelessWidget {
   final Pet pet;
@@ -13,7 +13,7 @@ class HighlightCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PetDetailsScreen(pet: pet)),
+          MaterialPageRoute(builder: (context) => PetDetailsView(pet: pet)),
         );
       },
       child: Container(

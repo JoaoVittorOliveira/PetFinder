@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:petfinder/screens/register_pet_screen.dart';
-import '../widgets/home_screen/home_header.dart';
-import '../widgets/home_screen/highlights_carousel.dart';
-import '../widgets/home_screen/pet_filters.dart';
-import '../widgets/home_screen/pet_grid.dart';
+import 'package:petfinder/views/register_pet_view.dart';
+import '../widgets/home_view/home_header.dart';
+import '../widgets/home_view/highlights_carousel.dart';
+import '../widgets/home_view/pet_filters.dart';
+import '../widgets/home_view/pet_grid.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomeView extends StatelessWidget {
+  const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class HomeScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const RegisterPetScreen()),
+            MaterialPageRoute(builder: (context) => const RegisterPetView()),
           );
         },
         backgroundColor: Colors.deepOrange,

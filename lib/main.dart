@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:petfinder/controllers/auth_controller.dart';
 import 'package:petfinder/controllers/pet_controller.dart';
-import 'package:petfinder/screens/home_screen.dart';
-import 'package:petfinder/screens/login_screen.dart';
+import 'package:petfinder/views/home_view.dart';
+import 'package:petfinder/views/login_view.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() async {
@@ -39,7 +39,7 @@ class PetFinderApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.grey[50],
         useMaterial3: true,
       ),
-      home: isLoggedIn ? const HomeScreen() : const LoginScreen(),
+      home: isLoggedIn ? const HomeView() : const LoginView(),
     );
   }
 }

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:petfinder/controllers/auth_controller.dart';
 import 'package:petfinder/controllers/pet_controller.dart';
-import 'package:petfinder/widgets/register_pet_screen/custom_text_field.dart';
-import 'package:petfinder/widgets/register_pet_screen/image_upload_placeholder.dart';
+import 'package:petfinder/widgets/register_pet_view/custom_text_field.dart';
+import 'package:petfinder/widgets/register_pet_view/image_upload_placeholder.dart';
 import '../models/pet.dart';
 
-class RegisterPetScreen extends StatefulWidget {
-  const RegisterPetScreen({super.key});
+class RegisterPetView extends StatefulWidget {
+  const RegisterPetView({super.key});
 
   @override
-  State<RegisterPetScreen> createState() => _RegisterPetScreenState();
+  State<RegisterPetView> createState() => _RegisterPetViewState();
 }
 
-class _RegisterPetScreenState extends State<RegisterPetScreen> {
+class _RegisterPetViewState extends State<RegisterPetView> {
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
