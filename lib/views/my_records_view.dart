@@ -14,7 +14,7 @@ class MyRecordsView extends StatelessWidget {
     final firstName = currentUser?.name?.split(' ').first ?? 'Usuário';
 
     return Scaffold(
-      appBar: AppBar(title: Text('Registros de $firstName')),
+      appBar: AppBar(title: Text('Meus perdidos')),
       body: ValueListenableBuilder<List<Pet>>(
         valueListenable: PetController.instance.allPetsNotifier,
         builder: (context, allPets, child) {
@@ -75,9 +75,20 @@ class MyRecordsView extends StatelessWidget {
                           backgroundColor: Colors.green,
                         )
                       : TextButton.icon(
-                          onPressed: () => PetController.instance.markAsFound(
-                            pet.id.toString(),
-                          ),
+                          onPressed: () async {
+                            final success = await PetController.instance
+                                .markAsFound(pet.id.toString());
+                            if (!success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Erro ao marcar pet encontrado',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
                           icon: const Icon(
                             Icons.check_circle,
                             color: Colors.deepOrange,

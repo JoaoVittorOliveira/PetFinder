@@ -90,7 +90,7 @@ class Pet {
       createdAt: DateTime.parse(
         map['created_at'] ?? DateTime.now().toIso8601String(),
       ),
-      isFound: map['isFound'] == 1,
+      isFound: map['is_found'] == true,
     );
   }
 }

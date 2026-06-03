@@ -119,13 +119,7 @@ class DatabaseService {
   /// Marca um pet como encontrado
   Future<bool> markPetAsFound(String petId) async {
     try {
-      await _supabase
-          .from('Pet')
-          .update({
-            'isFound': true,
-            'updatedAt': DateTime.now().toIso8601String(),
-          })
-          .eq('id', petId);
+      await _supabase.from('Pet').update({'is_found': true}).eq('id', petId);
       return true;
     } catch (e) {
       print('Erro ao marcar pet como encontrado: $e');

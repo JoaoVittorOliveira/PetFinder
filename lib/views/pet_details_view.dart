@@ -294,20 +294,22 @@ class _PetDetailsViewState extends State<PetDetailsView> {
                           ),
                         ),
                       ),
-                      // Tag de Perdido
+                      // Tag de status do pet
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
+                          color: _pet.isFound
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Text(
-                          '🔴 PERDIDO',
+                        child: Text(
+                          _pet.isFound ? '🟢 ENCONTRADO' : '🔴 PERDIDO',
                           style: TextStyle(
-                            color: Colors.red,
+                            color: _pet.isFound ? Colors.green : Colors.red,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
