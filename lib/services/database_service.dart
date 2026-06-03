@@ -1,121 +1,146 @@
 import 'dart:async';
-import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:path/path.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../models/pet.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
   DatabaseService._internal();
 
-  static Database? _database;
+  late final SupabaseClient _supabase;
 
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDb();
-    return _database!;
+  // Inicializa a conexão com Supabase
+  Future<void> initialize(String url, String anonKey) async {
+    await Supabase.initialize(url: url, anonKey: anonKey);
+    _supabase = Supabase.instance.client;
   }
 
-  Future<Database> _initDb() async {
-    // Inicializa o FFI apenas em ambientes desktop (não-web, não-mobile)
-    if (kIsWeb &&
-        (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-      sqfliteFfiInit();
-      databaseFactory = databaseFactoryFfi;
-    }
-
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'petfinder.db');
-
-    return await openDatabase(
-      path,
-      version: 4,
-      onCreate: _createTables,
-      onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 3) {
-          await db.execute('DROP TABLE IF EXISTS pets');
-          await db.execute('DROP TABLE IF EXISTS session');
-          await _createTables(db, newVersion);
-        }
-      },
-    );
-  }
-
-  Future<void> _createTables(Database db, int version) async {
-    // Tabela de Pets com a nova coluna userId
-    await db.execute('''
-      CREATE TABLE pets (
-        id TEXT PRIMARY KEY,
-        userId TEXT NOT NULL,
-        name TEXT NOT NULL,
-        type TEXT NOT NULL,
-        location TEXT NOT NULL,
-        description TEXT NOT NULL,
-        contact TEXT NOT NULL,
-        dummyImageUrl TEXT,
-        datePosted TEXT NOT NULL,
-        isFound INTEGER NOT NULL DEFAULT 0
-      )
-    ''');
-
-    // Tabela para guardar quem está logado
-    await db.execute('''
-      CREATE TABLE session (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL
-      )
-    ''');
-  }
-
-  Future<void> close() async {
-    final db = await database;
-    await db.close();
-  }
+  SupabaseClient get supabase => _supabase;
 
   // --- MÉTODOS DE PETS ---
-  Future<void> savePets(List<Pet> pets) async {
-    final db = await database;
 
-    await db.transaction((txn) async {
-      await txn.delete('pets');
-      for (final pet in pets) {
-        await txn.insert(
-          'pets',
-          pet.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
-    });
+  /// Salva um novo pet no Supabase
+  Future<Pet?> savePet(Pet pet) async {
+    try {
+      final response = await _supabase
+          .from('Pet')
+          .insert(pet.toMap())
+          .select()
+          .single();
+
+      return Pet.fromMap(response as Map<String, dynamic>);
+    } catch (e) {
+      print('Erro ao salvar pet: $e');
+      return null;
+    }
   }
 
+  /// Carrega todos os pets do Supabase
   Future<List<Pet>> loadPets() async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('pets');
-    return maps.map((map) => Pet.fromMap(map)).toList();
+    try {
+      final response = await _supabase
+          .from('Pet')
+          .select()
+          .order('created_at', ascending: false);
+
+      if (response.isEmpty) {
+        return [];
+      }
+
+      return (response as List<dynamic>)
+          .map((data) => Pet.fromMap(data as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print('Erro ao carregar pets: $e');
+      return [];
+    }
   }
 
-  Future<void> clearAll() async {
-    final db = await database;
-    await db.delete('pets');
+  /// Atualiza um pet existente
+  Future<bool> updatePet(Pet pet) async {
+    try {
+      await _supabase.from('Pet').update(pet.toMap()).eq('id', pet.id);
+      return true;
+    } catch (e) {
+      print('Erro ao atualizar pet: $e');
+      return false;
+    }
   }
 
-  // --- MÉTODOS DE SESSÃO (LOGIN) ---
-  Future<void> saveSession(String id, String name) async {
-    final db = await database;
-    await db.delete('session'); // Garante que só teremos 1 usuário logado
-    await db.insert('session', {'id': id, 'name': name});
+  /// Deleta um pet
+  Future<bool> deletePet(String petId) async {
+    try {
+      await _supabase.from('Pet').delete().eq('id', petId);
+      return true;
+    } catch (e) {
+      print('Erro ao deletar pet: $e');
+      return false;
+    }
   }
 
-  Future<Map<String, dynamic>?> getSession() async {
-    final db = await database;
-    final result = await db.query('session', limit: 1);
-    if (result.isNotEmpty) return result.first;
-    return null;
+  /// Busca pets por tipo
+  Future<List<Pet>> searchPetsByType(String type) async {
+    try {
+      final response = await _supabase
+          .from('Pet')
+          .select()
+          .eq('type', type)
+          .order('created_at', ascending: false);
+
+      if (response.isEmpty) {
+        return [];
+      }
+
+      return (response as List<dynamic>)
+          .map((data) => Pet.fromMap(data as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print('Erro ao buscar pets por tipo: $e');
+      return [];
+    }
   }
 
-  Future<void> clearSession() async {
-    final db = await database;
-    await db.delete('session');
+  /// Marca um pet como encontrado
+  Future<bool> markPetAsFound(String petId) async {
+    try {
+      await _supabase
+          .from('Pet')
+          .update({
+            'isFound': true,
+            'updatedAt': DateTime.now().toIso8601String(),
+          })
+          .eq('id', petId);
+      return true;
+    } catch (e) {
+      print('Erro ao marcar pet como encontrado: $e');
+      return false;
+    }
+  }
+
+  /// Limpa todos os pets (use com cuidado!)
+  Future<bool> clearAllPets() async {
+    try {
+      await _supabase.from('Pet').delete().neq('id', '');
+      return true;
+    } catch (e) {
+      print('Erro ao limpar todos os pets: $e');
+      return false;
+    }
+  }
+
+  /// Retorna um stream de pets em tempo real (opcional, para atualizações ao vivo)
+  Stream<List<Pet>> getPetsStream() {
+    return _supabase
+        .from('Pet')
+        .stream(primaryKey: ['id'])
+        .order('created_at', ascending: false)
+        .map(
+          (data) => (data as List<dynamic>)
+              .map((item) => Pet.fromMap(item as Map<String, dynamic>))
+              .toList(),
+        )
+        .handleError((error) {
+          print('Erro no stream de pets: $error');
+        });
   }
 }

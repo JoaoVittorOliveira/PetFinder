@@ -22,9 +22,9 @@ class HighlightCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color: Colors.grey[300], // Placeholder para a imagem de fundo
-          image: pet.dummyImageUrl.isNotEmpty
+          image: pet.dummyImage.isNotEmpty
               ? DecorationImage(
-                  image: NetworkImage(pet.dummyImageUrl),
+                  image: NetworkImage(pet.dummyImage),
                   fit: BoxFit.cover,
                 )
               : null,
@@ -32,7 +32,7 @@ class HighlightCard extends StatelessWidget {
         child: Stack(
           children: [
             // Ícone de placeholder caso não tenha imagem
-            if (pet.dummyImageUrl.isEmpty)
+            if (pet.dummyImage.isEmpty)
               const Center(
                 child: Icon(Icons.pets, size: 60, color: Colors.grey),
               ),

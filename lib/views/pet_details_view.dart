@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // formatar datas
-import 'package:petfinder/controllers/auth_controller.dart';
 import '../models/pet.dart';
 
 class PetDetailsView extends StatelessWidget {
@@ -19,7 +18,7 @@ class PetDetailsView extends StatelessWidget {
       'dd \'de\' MMMM \'de\' yyyy',
       'pt_BR',
     );
-    final String formattedDate = formatter.format(pet.datePosted);
+    final String formattedDate = formatter.format(pet.createdAt);
 
     return Scaffold(
       backgroundColor: Colors.white, // Fundo branco conforme pedido
@@ -39,8 +38,8 @@ class PetDetailsView extends StatelessWidget {
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              background: pet.dummyImageUrl.isNotEmpty
-                  ? Image.network(pet.dummyImageUrl, fit: BoxFit.cover)
+              background: pet.dummyImage.isNotEmpty
+                  ? Image.network(pet.dummyImage, fit: BoxFit.cover)
                   : Container(
                       color: Colors.grey[300],
                       child: const Icon(
@@ -153,10 +152,6 @@ class PetDetailsView extends StatelessWidget {
                   const SizedBox(height: 8),
                   Builder(
                     builder: (context) {
-                      final author = AuthController.instance.getUserById(
-                        pet.userId,
-                      );
-
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: CircleAvatar(
@@ -167,10 +162,10 @@ class PetDetailsView extends StatelessWidget {
                           ),
                         ),
                         title: Text(
-                          author?.name ?? 'Usuário do PetFinder',
+                          'Usuário do PetFinder',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Text(author?.phone ?? pet.contact),
+                        subtitle: Text('author?.phone ?? pet.contact'),
                       );
                     },
                   ),

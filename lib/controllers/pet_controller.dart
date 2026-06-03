@@ -12,6 +12,7 @@ class PetController {
 
   final ValueNotifier<List<Pet>> petsNotifier = ValueNotifier<List<Pet>>([]);
   final ValueNotifier<List<Pet>> allPetsNotifier = ValueNotifier<List<Pet>>([]);
+  final ValueNotifier<bool> isLoadingNotifier = ValueNotifier<bool>(false);
 
   // Controladores de estado dos filtros
   final ValueNotifier<String> selectedFilterNotifier = ValueNotifier<String>(
@@ -20,33 +21,68 @@ class PetController {
   String _currentSearchQuery = '';
 
   Future<void> init() async {
-    _allPets = await _database.loadPets();
-    allPetsNotifier.value = List.from(_allPets);
-    _applyFilters(); // Aplica filtros iniciais (se houver) e atualiza a tela
-  }
-
-  Future<void> addPet(Pet pet) async {
-    _allPets.add(pet);
-    await _database.savePets(_allPets);
-    allPetsNotifier.value = List.from(_allPets);
-    _applyFilters();
-  }
-
-  Future<void> clearAllPets() async {
-    _allPets = [];
-    await _database.clearAll();
-    allPetsNotifier.value = List.from(_allPets);
-    _applyFilters();
-  }
-
-  Future<void> markAsFound(String petId) async {
-    final index = _allPets.indexWhere((p) => p.id == petId);
-    if (index != -1) {
-      _allPets[index] = _allPets[index].copyWith(isFound: true);
-      await _database.savePets(_allPets); // Salva a lista atualizada
+    isLoadingNotifier.value = true;
+    try {
+      _allPets = await _database.loadPets();
       allPetsNotifier.value = List.from(_allPets);
-      _applyFilters(); // Recalcula a Home (vai esconder o pet)
+      _applyFilters();
+    } finally {
+      isLoadingNotifier.value = false;
     }
+  }
+
+  Future<bool> addPet(Pet pet) async {
+    isLoadingNotifier.value = true;
+    try {
+      final savedPet = await _database.savePet(pet);
+      if (savedPet != null) {
+        _allPets.add(savedPet);
+        allPetsNotifier.value = List.from(_allPets);
+        _applyFilters();
+        return true;
+      }
+      return false;
+    } finally {
+      isLoadingNotifier.value = false;
+    }
+  }
+
+  Future<bool> removePet(String petId) async {
+    try {
+      final success = await _database.deletePet(petId);
+      if (success) {
+        _allPets.removeWhere((p) => p.id == petId);
+        allPetsNotifier.value = List.from(_allPets);
+        _applyFilters();
+      }
+      return success;
+    } catch (e) {
+      print('Erro ao remover pet: $e');
+      return false;
+    }
+  }
+
+  Future<bool> markAsFound(String petId) async {
+    try {
+      final success = await _database.markPetAsFound(petId);
+      if (success) {
+        final index = _allPets.indexWhere((p) => p.id == petId);
+        if (index != -1) {
+          _allPets[index] = _allPets[index].copyWith(isFound: true);
+          allPetsNotifier.value = List.from(_allPets);
+          _applyFilters();
+        }
+      }
+      return success;
+    } catch (e) {
+      print('Erro ao marcar pet como encontrado: $e');
+      return false;
+    }
+  }
+
+  /// Recarrega pets do Supabase (útil para sincronização)
+  Future<void> refreshPets() async {
+    await init();
   }
 
   // --- MÉTODOS DE BUSCA E FILTRO ---

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:petfinder/controllers/pet_controller.dart';
+import 'package:petfinder/views/home_view.dart';
 import 'package:petfinder/views/my_records_view.dart';
 
 class HomeHeader extends StatelessWidget {
@@ -28,9 +29,7 @@ class HomeHeader extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const MyRecordsView(),
-                    ),
+                    MaterialPageRoute(builder: (context) => const HomeView()),
                   );
                 },
                 icon: const Icon(

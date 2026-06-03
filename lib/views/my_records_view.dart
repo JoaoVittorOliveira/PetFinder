@@ -1,3 +1,4 @@
+/* 
 import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/pet_controller.dart';
@@ -59,7 +60,7 @@ class MyRecordsView extends StatelessWidget {
                   leading: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      pet.dummyImageUrl,
+                      pet.dummyImage,
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
@@ -99,3 +100,4 @@ class MyRecordsView extends StatelessWidget {
     );
   }
 }
+*/

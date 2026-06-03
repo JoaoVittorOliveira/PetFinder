@@ -45,15 +45,15 @@ class PetCard extends StatelessWidget {
                     top: Radius.circular(16),
                   ),
                   // Renderiza a imagem se a URL não for vazia
-                  image: pet.dummyImageUrl.isNotEmpty
+                  image: pet.dummyImage.isNotEmpty
                       ? DecorationImage(
-                          image: NetworkImage(pet.dummyImageUrl),
+                          image: NetworkImage(pet.dummyImage),
                           fit: BoxFit.cover,
                         )
                       : null,
                 ),
                 // Mostra o ícone apenas se não houver imagem
-                child: pet.dummyImageUrl.isEmpty
+                child: pet.dummyImage.isEmpty
                     ? const Icon(Icons.pets, color: Colors.grey, size: 40)
                     : null,
               ),

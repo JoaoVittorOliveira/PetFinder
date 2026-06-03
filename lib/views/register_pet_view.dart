@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:petfinder/controllers/auth_controller.dart';
 import 'package:petfinder/controllers/pet_controller.dart';
 import 'package:petfinder/widgets/register_pet_view/custom_text_field.dart';
 import 'package:petfinder/widgets/register_pet_view/image_upload_placeholder.dart';
@@ -34,18 +33,16 @@ class _RegisterPetViewState extends State<RegisterPetView> {
   void _savePet() {
     if (_formKey.currentState!.validate()) {
       final newPet = Pet(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: AuthController.instance.currentUser.value!.id,
+        id: 0, // ← O id será gerado automaticamente pelo Supabase
+        // userId: '1',  // ← Removido, não existe mais na tabela
         name: _nameController.text.trim(),
         type: _selectedType,
         location: _locationController.text.trim(),
         description: _descriptionController.text.trim(),
         contact: _contactController.text.trim(),
-
-        datePosted: DateTime.now(),
-        // acessar pelo banco de dados futuramente
-        dummyImageUrl:
+        dummyImage:
             'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=500',
+        createdAt: DateTime.now(), // ← Mudou de datePosted
       );
 
       // chama o controller para adicionar o pet e persistir os dados

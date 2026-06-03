@@ -10,6 +10,7 @@ class AppUser {
 }
 
 class AuthController {
+  /* 
   static final AuthController instance = AuthController._internal();
   AuthController._internal();
 
@@ -22,6 +23,7 @@ class AuthController {
     AppUser(id: '2', name: 'Maria Souza', phone: '(21) 97777-2222'),
   ];
 
+  
   Future<void> init() async {
     final sessionData = await _database.getSession();
     if (sessionData != null) {
@@ -46,4 +48,5 @@ class AuthController {
       return null;
     }
   }
+  */
 }
