@@ -3,6 +3,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:petfinder/controllers/pet_controller.dart';
 import 'package:petfinder/views/home_view.dart';
 import 'package:petfinder/services/database_service.dart';
+import 'package:petfinder/services/image_upload_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +12,8 @@ void main() async {
     'https://lnvoyeegvsyuoinunvhe.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxudm95ZWVndnN5dW9pbnVudmhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTU1OTEsImV4cCI6MjA5NTM5MTU5MX0.iKD1TTnZqg5deT26A0Qf7Gj6y8JQxEMn_Cv5oYGjNQY',
   );
+
+  ImageUploadService.instance.initialize(DatabaseService.instance.supabase);
 
   await initializeDateFormatting('pt_BR', null);
 

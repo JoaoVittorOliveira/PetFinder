@@ -38,8 +38,8 @@ class PetDetailsView extends StatelessWidget {
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              background: pet.dummyImage.isNotEmpty
-                  ? Image.network(pet.dummyImage, fit: BoxFit.cover)
+              background: pet.imageUrls.isNotEmpty
+                  ? Image.network(pet.imageUrls.first, fit: BoxFit.cover)
                   : Container(
                       color: Colors.grey[300],
                       child: const Icon(

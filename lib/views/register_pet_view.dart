@@ -1,7 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:petfinder/controllers/pet_controller.dart';
+import 'package:petfinder/services/image_upload_service.dart';
 import 'package:petfinder/widgets/register_pet_view/custom_text_field.dart';
-import 'package:petfinder/widgets/register_pet_view/image_upload_placeholder.dart';
 import '../models/pet.dart';
 
 class RegisterPetView extends StatefulWidget {
@@ -20,6 +21,9 @@ class _RegisterPetViewState extends State<RegisterPetView> {
   final _contactController = TextEditingController();
 
   String _selectedType = 'cao';
+  List<File> _selectedImages = [];
+  List<String> _uploadedImageUrls = [];
+  bool _isUploading = false;
 
   @override
   void dispose() {
@@ -30,31 +34,81 @@ class _RegisterPetViewState extends State<RegisterPetView> {
     super.dispose();
   }
 
-  void _savePet() {
+  Future<void> _pickImages() async {
+    final images = await ImageUploadService.instance.selectImagesFromGallery();
+    if (images.isNotEmpty) {
+      setState(() {
+        _selectedImages.addAll(images);
+      });
+    }
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      _selectedImages.removeAt(index);
+    });
+  }
+
+  Future<void> _savePet() async {
     if (_formKey.currentState!.validate()) {
+      // Se há imagens selecionadas mas não foram uploadadas ainda
+      if (_selectedImages.isNotEmpty && _uploadedImageUrls.isEmpty) {
+        setState(() => _isUploading = true);
+
+        try {
+          _uploadedImageUrls = await ImageUploadService.instance.uploadImages(
+            _selectedImages,
+            0, // petId temporário (será gerado pelo Supabase)
+          );
+
+          if (_uploadedImageUrls.isEmpty) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Erro ao fazer upload das imagens'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+            setState(() => _isUploading = false);
+            return;
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Erro ao fazer upload: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          setState(() => _isUploading = false);
+          return;
+        }
+      }
+
       final newPet = Pet(
-        id: 0, // ← O id será gerado automaticamente pelo Supabase
-        // userId: '1',  // ← Removido, não existe mais na tabela
+        id: 0, // O id será gerado automaticamente pelo Supabase
         name: _nameController.text.trim(),
         type: _selectedType,
         location: _locationController.text.trim(),
         description: _descriptionController.text.trim(),
         contact: _contactController.text.trim(),
-        dummyImage:
-            'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=500',
-        createdAt: DateTime.now(), // ← Mudou de datePosted
+        imageUrls: _uploadedImageUrls,
+        createdAt: DateTime.now(),
       );
 
-      // chama o controller para adicionar o pet e persistir os dados
+      // Chama o controller para adicionar o pet e persistir os dados
       PetController.instance.addPet(newPet);
 
-      // resultado visual e volta para a tela anterior
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pet publicado com sucesso!')),
         );
         Navigator.pop(context);
       }
+
+      setState(() => _isUploading = false);
     }
   }
 
@@ -72,21 +126,95 @@ class _RegisterPetViewState extends State<RegisterPetView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Componente modularizado de Imagem
-              ImageUploadPlaceholder(
-                onTap: () {
-                  // TODO: Lógica de abrir galeria/câmera
-                },
+              // Galeria de imagens selecionadas
+              if (_selectedImages.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Imagens selecionadas:',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 100,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _selectedImages.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    width: 100,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      image: DecorationImage(
+                                        image: FileImage(
+                                          _selectedImages[index],
+                                        ),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 4,
+                                    right: 4,
+                                    child: GestureDetector(
+                                      onTap: () => _removeImage(index),
+                                      child: Container(
+                                        decoration: const BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        padding: const EdgeInsets.all(4),
+                                        child: const Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                          size: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Botão para adicionar mais fotos
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: ElevatedButton.icon(
+                  onPressed: _isUploading ? null : _pickImages,
+                  icon: const Icon(Icons.add_a_photo),
+                  label: const Text('Adicionar Foto'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepOrange,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
               ),
 
-              // Componentes modularizados de Texto
+              // Componentes de Texto
               CustomTextField(
                 controller: _nameController,
                 labelText: 'Nome do Pet (Opcional)',
               ),
 
-              // O Dropdown ainda não foi abstraído pois é o único na tela,
-              // mas poderia ser se tivéssemos mais selects.
+              // Dropdown de tipo
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: DropdownButtonFormField<String>(
@@ -132,7 +260,7 @@ class _RegisterPetViewState extends State<RegisterPetView> {
               const SizedBox(height: 16),
 
               ElevatedButton(
-                onPressed: _savePet,
+                onPressed: _isUploading ? null : _savePet,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepOrange,
                   foregroundColor: Colors.white,
@@ -142,7 +270,18 @@ class _RegisterPetViewState extends State<RegisterPetView> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                child: const Text('Publicar Registro'),
+                child: _isUploading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('Publicar Registro'),
               ),
             ],
           ),

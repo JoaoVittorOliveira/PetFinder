@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/pet.dart';
+import 'image_upload_service.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
@@ -67,9 +68,24 @@ class DatabaseService {
     }
   }
 
-  /// Deleta um pet
+  /// Deleta um pet e suas imagens associadas
   Future<bool> deletePet(String petId) async {
     try {
+      // Primeiro, busca o pet para obter as imagens
+      final petResponse = await _supabase
+          .from('Pet')
+          .select('image_urls')
+          .eq('id', petId)
+          .single();
+
+      final imageUrls = List<String>.from(petResponse['image_urls'] ?? []);
+
+      // Deleta as imagens do Supabase Storage
+      if (imageUrls.isNotEmpty) {
+        await ImageUploadService.instance.deleteImages(imageUrls);
+      }
+
+      // Deleta o pet do banco
       await _supabase.from('Pet').delete().eq('id', petId);
       return true;
     } catch (e) {
