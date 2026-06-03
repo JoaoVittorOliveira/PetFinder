@@ -51,7 +51,7 @@ class PetController {
     try {
       final success = await _database.deletePet(petId);
       if (success) {
-        _allPets.removeWhere((p) => p.id == petId);
+        _allPets.removeWhere((p) => p.id.toString() == petId);
         allPetsNotifier.value = List.from(_allPets);
         _applyFilters();
       }
@@ -62,11 +62,33 @@ class PetController {
     }
   }
 
+  Future<bool> deletePet(String petId) async {
+    return removePet(petId);
+  }
+
+  Future<bool> updatePet(Pet pet) async {
+    try {
+      final success = await _database.updatePet(pet);
+      if (success) {
+        final index = _allPets.indexWhere((p) => p.id == pet.id);
+        if (index != -1) {
+          _allPets[index] = pet;
+          allPetsNotifier.value = List.from(_allPets);
+          _applyFilters();
+        }
+      }
+      return success;
+    } catch (e) {
+      print('Erro ao atualizar pet: $e');
+      return false;
+    }
+  }
+
   Future<bool> markAsFound(String petId) async {
     try {
       final success = await _database.markPetAsFound(petId);
       if (success) {
-        final index = _allPets.indexWhere((p) => p.id == petId);
+        final index = _allPets.indexWhere((p) => p.id.toString() == petId);
         if (index != -1) {
           _allPets[index] = _allPets[index].copyWith(isFound: true);
           allPetsNotifier.value = List.from(_allPets);

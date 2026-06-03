@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:petfinder/controllers/auth_controller.dart';
 import 'package:petfinder/controllers/pet_controller.dart';
 import 'package:petfinder/views/home_view.dart';
+import 'package:petfinder/views/login_view.dart';
 import 'package:petfinder/services/database_service.dart';
 import 'package:petfinder/services/image_upload_service.dart';
 
@@ -15,16 +17,11 @@ void main() async {
 
   ImageUploadService.instance.initialize(DatabaseService.instance.supabase);
 
+  AuthController.instance.initialize(DatabaseService.instance.supabase);
+
   await initializeDateFormatting('pt_BR', null);
 
-  /* 
-  // Inicializa o databaseFactory para desktop (Windows/Linux/macOS)
-  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-    databaseFactory = databaseFactoryFfi;
-  }
-  */
-
-  // await AuthController.instance.init();
+  await AuthController.instance.init();
   await PetController.instance.init();
 
   runApp(const PetFinderApp());
@@ -35,8 +32,6 @@ class PetFinderApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final isLoggedIn = AuthController.instance.currentUser.value != null;
-
     return MaterialApp(
       title: 'PetFinder',
       debugShowCheckedModeBanner: false,
@@ -45,7 +40,12 @@ class PetFinderApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.grey[50],
         useMaterial3: true,
       ),
-      home: const HomeView(),
+      home: ValueListenableBuilder<AppUser?>(
+        valueListenable: AuthController.instance.currentUser,
+        builder: (context, user, _) {
+          return user != null ? const HomeView() : const LoginView();
+        },
+      ),
     );
   }
 }

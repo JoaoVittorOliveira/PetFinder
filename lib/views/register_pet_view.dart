@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:petfinder/controllers/auth_controller.dart';
 import 'package:petfinder/controllers/pet_controller.dart';
 import 'package:petfinder/services/image_upload_service.dart';
 import 'package:petfinder/widgets/register_pet_view/custom_text_field.dart';
@@ -89,6 +90,7 @@ class _RegisterPetViewState extends State<RegisterPetView> {
 
       final newPet = Pet(
         id: 0, // O id será gerado automaticamente pelo Supabase
+        userId: AuthController.instance.currentUser.value?.id ?? '2',
         name: _nameController.text.trim(),
         type: _selectedType,
         location: _locationController.text.trim(),

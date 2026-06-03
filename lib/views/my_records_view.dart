@@ -1,9 +1,8 @@
-/* 
 import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet.dart';
-import 'login_view.dart';
+import 'pet_details_view.dart';
 
 class MyRecordsView extends StatelessWidget {
   const MyRecordsView({super.key});
@@ -11,30 +10,11 @@ class MyRecordsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = AuthController.instance.currentUser.value;
-    // Opcional: Pegue apenas o primeiro nome
-    final firstName = currentUser?.name.split(' ').first ?? 'Usuário';
+    // Pega apenas o primeiro nome
+    final firstName = currentUser?.name?.split(' ').first ?? 'Usuário';
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Registros de $firstName'), // NOVO NOME NA BARRA
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.red),
-            tooltip: 'Sair',
-            onPressed: () async {
-              await AuthController.instance.logout();
-              if (context.mounted) {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginView()),
-                  (route) => false,
-                );
-              }
-            },
-          ),
-        ],
-      ),
-      // Mudamos para escutar o allPetsNotifier para ver os encontrados também
+      appBar: AppBar(title: Text('Registros de $firstName')),
       body: ValueListenableBuilder<List<Pet>>(
         valueListenable: PetController.instance.allPetsNotifier,
         builder: (context, allPets, child) {
@@ -59,18 +39,33 @@ class MyRecordsView extends StatelessWidget {
                   contentPadding: const EdgeInsets.all(12),
                   leading: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      pet.dummyImage,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                    ),
+                    child: pet.imageUrls.isNotEmpty
+                        ? Image.network(
+                            pet.imageUrls.first,
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 60,
+                                height: 60,
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.pets),
+                              );
+                            },
+                          )
+                        : Container(
+                            width: 60,
+                            height: 60,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.pets),
+                          ),
                   ),
                   title: Text(
                     pet.name,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text(pet.datePosted.toString().substring(0, 10)),
+                  subtitle: Text(pet.location),
                   trailing: pet.isFound
                       ? const Chip(
                           label: Text(
@@ -80,8 +75,9 @@ class MyRecordsView extends StatelessWidget {
                           backgroundColor: Colors.green,
                         )
                       : TextButton.icon(
-                          onPressed: () =>
-                              PetController.instance.markAsFound(pet.id),
+                          onPressed: () => PetController.instance.markAsFound(
+                            pet.id.toString(),
+                          ),
                           icon: const Icon(
                             Icons.check_circle,
                             color: Colors.deepOrange,
@@ -91,6 +87,14 @@ class MyRecordsView extends StatelessWidget {
                             style: TextStyle(color: Colors.deepOrange),
                           ),
                         ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PetDetailsView(pet: pet),
+                      ),
+                    );
+                  },
                 ),
               );
             },
@@ -100,4 +104,3 @@ class MyRecordsView extends StatelessWidget {
     );
   }
 }
-*/

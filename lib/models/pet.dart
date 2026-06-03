@@ -2,7 +2,7 @@
 
 class Pet {
   final int id;
-  // final String userId; // ID do usuário que cadastrou o pet
+  final String userId; // ID do usuário que cadastrou o pet
   final String name;
   final String type; // 'cao', 'gato' ou 'outro'
   final String location;
@@ -15,7 +15,7 @@ class Pet {
 
   Pet({
     required this.id,
-    // required this.userId,
+    required this.userId,
     required this.name,
     required this.type,
     required this.location,
@@ -26,15 +26,23 @@ class Pet {
     this.isFound = false,
   });
 
-  Pet copyWith({bool? isFound, List<String>? imageUrls}) {
+  Pet copyWith({
+    bool? isFound,
+    List<String>? imageUrls,
+    String? name,
+    String? type,
+    String? location,
+    String? description,
+    String? contact,
+  }) {
     return Pet(
       id: id,
-      // userId: userId,
-      name: name,
-      type: type,
-      location: location,
-      description: description,
-      contact: contact,
+      userId: userId,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      location: location ?? this.location,
+      description: description ?? this.description,
+      contact: contact ?? this.contact,
       imageUrls: imageUrls ?? this.imageUrls,
       createdAt: createdAt,
       isFound: isFound ?? this.isFound,
@@ -43,6 +51,7 @@ class Pet {
 
   Map<String, dynamic> toMap() {
     return {
+      'user_id': userId,
       'name': name,
       'type': type,
       'location': location,
@@ -70,7 +79,7 @@ class Pet {
 
     return Pet(
       id: map['id'] ?? 0,
-      // userId: map['userId'] ?? '2',
+      userId: map['user_id'] ?? '2',
       name: map['name'] ?? '',
       type: map['type'] ?? 'outro',
       location: map['location'] ?? '',

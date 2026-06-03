@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:petfinder/controllers/auth_controller.dart';
 import 'package:petfinder/controllers/pet_controller.dart';
-import 'package:petfinder/views/home_view.dart';
 import 'package:petfinder/views/my_records_view.dart';
 
 class HomeHeader extends StatelessWidget {
@@ -25,19 +25,78 @@ class HomeHeader extends StatelessWidget {
                   color: Colors.deepOrange,
                 ),
               ),
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomeView()),
-                  );
-                },
+              PopupMenuButton<String>(
                 icon: const Icon(
                   Icons.person,
                   color: Colors.deepOrange,
                   size: 28,
                 ),
-                tooltip: 'Meus Registros e Perfil',
+                onSelected: (value) async {
+                  if (value == 'logout') {
+                    await AuthController.instance.signOut();
+                  } else if (value == 'records') {
+                    if (context.mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MyRecordsView(),
+                        ),
+                      );
+                    }
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  PopupMenuItem(
+                    value: 'profile',
+                    enabled: false,
+                    child: ValueListenableBuilder<AppUser?>(
+                      valueListenable: AuthController.instance.currentUser,
+                      builder: (context, user, _) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user?.name ?? 'Usuário',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              user?.email ?? '',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem(
+                    value: 'records',
+                    child: Row(
+                      children: [
+                        Icon(Icons.list, size: 20),
+                        SizedBox(width: 8),
+                        Text('Meus Registros'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, size: 20, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Sair', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
